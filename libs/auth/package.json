@@ -1,0 +1,10 @@
+{
+  "name": "@ababu-9a4f2c18-6e3d-4b5a-8c9d-1e2f3a4b5c6d/auth",
+  "version": "0.0.1",
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "typings": "./src/index.d.ts"
+}
