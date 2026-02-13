@@ -30,6 +30,8 @@ Once the servers are running:
 
 ##### Backend API: http://localhost:3000/api
 
+Some data is already seeded into: database.sqlite so you can see sample entries!
+
 ## Architecture Overview
 
 ### **Environment Configuration (.env)**
