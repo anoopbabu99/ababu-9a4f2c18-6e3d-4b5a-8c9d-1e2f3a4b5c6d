@@ -25,13 +25,13 @@ export class Task {
   @Column({ default: 'General' }) // Default category
   category: string;
 
-  @Column({ default: 0 }) // For Drag-and-Drop ordering
+  @Column({ type: 'int', default: 0 })
   order: number;
 
   @CreateDateColumn() // Auto-timestamps for Charts
   createdAt: Date;
   // ------------------
 
-  @ManyToOne(() => User, (user) => user.tasks)
+  @ManyToOne(() => User, (user) => user.tasks, { eager: false })
   user: User;
 }

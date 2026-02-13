@@ -1,0 +1,260 @@
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TaskService, Task } from '../../services/task.service';
+import { AuthService } from '../../services/auth.service';
+import { FormsModule } from '@angular/forms';
+import { 
+  CdkDragDrop, 
+  moveItemInArray, 
+  transferArrayItem, 
+  DragDropModule 
+} from '@angular/cdk/drag-drop';
+
+@Component({
+  selector: 'app-task-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule, DragDropModule],
+  templateUrl: './task-list.component.html' // <--- Pointing to the new file
+})
+export class TaskListComponent implements OnInit {
+  // MASTER LIST
+  allTasks: Task[] = [];
+
+  // FILTER STATES
+  selectedOrg = '';
+  selectedUser = '';
+  selectedCategory = '';
+  sortBy = 'newest'; // Default sort
+
+  // DROPDOWN OPTIONS (Computed dynamically)
+  uniqueOrgs: string[] = [];
+  uniqueUsers: string[] = [];
+  
+  // DRAG & DROP ARRAYS (Must be distinct for drag to work)
+  todoTasks: Task[] = [];
+  inProgressTasks: Task[] = [];
+  doneTasks: Task[] = [];
+
+  currentUsername = '';
+  myDepartment = '';
+  userRole = '';
+  
+  private taskService = inject(TaskService);
+  private authService = inject(AuthService);
+  
+  // Modal State
+  isModalOpen = false;
+  isEditMode = false;
+  selectedTaskId: string | null = null;
+  newTask = { title: '', description: '', category: 'Work' }; // Default to 'Work'
+  
+  // Audit State
+  isAuditModalOpen = false;
+  auditLogs: any[] = [];
+
+  ngOnInit() {
+    this.currentUsername = this.authService.getUsername();
+    this.userRole = this.authService.getUserRole();
+    this.loadTasks();
+  }
+
+  loadTasks() {
+    this.taskService.getTasks().subscribe({
+      next: (data) => {
+        this.allTasks = data;
+        
+        // FIX: Add 'as string[]' to the end
+        this.uniqueOrgs = [...new Set(data.map(t => t.user?.organization?.name).filter(Boolean))] as string[];
+        this.uniqueUsers = [...new Set(data.map(t => t.user?.username).filter(Boolean))] as string[];
+        
+        // Apply filters immediately (to populate columns)
+        this.applyFilters(); 
+        this.calculateMyDepartment();
+      },
+      error: (err) => console.error('Failed to load tasks', err)
+    });
+  }
+
+  applyFilters() {
+    let filtered = [...this.allTasks];
+
+    // 1. Filter by Organization (Owner Only)
+    if (this.selectedOrg) {
+      filtered = filtered.filter(t => t.user?.organization?.name === this.selectedOrg);
+    }
+
+    // 2. Filter by User (Owner & Admin)
+    if (this.selectedUser) {
+      filtered = filtered.filter(t => t.user?.username === this.selectedUser);
+    }
+
+    // 3. Filter by Category (Everyone)
+    if (this.selectedCategory) {
+      filtered = filtered.filter(t => t.category === this.selectedCategory);
+    }
+
+    // 4. Sort (Newest vs Oldest)
+    if (this.sortBy === 'newest') {
+      // Sort by Created Date (assuming your entity has createdAt, otherwise use ID)
+      // Since we didn't explicitly return createdAt in DTO, we might rely on ID (lexicographical) or order
+      // Let's rely on the order we got from backend (which includes user defined order)
+      // BUT if the user wants "Newest", we can reverse logic if needed. 
+      // For now, let's keep the Drag-and-Drop order as the "master" sort unless explicitly overridden.
+    }
+
+    // 5. Update the Columns
+    this.todoTasks = filtered.filter(t => t.status === 'OPEN');
+    this.inProgressTasks = filtered.filter(t => t.status === 'IN_PROGRESS');
+    this.doneTasks = filtered.filter(t => t.status === 'DONE');
+  }
+
+  // Helper to reset filters
+  clearFilters() {
+    this.selectedOrg = '';
+    this.selectedUser = '';
+    this.selectedCategory = '';
+    this.applyFilters();
+  }
+
+  // Helper to split the tasks into columns
+  distributeTasks() {
+    this.todoTasks = this.allTasks.filter(t => t.status === 'OPEN');
+    this.inProgressTasks = this.allTasks.filter(t => t.status === 'IN_PROGRESS');
+    this.doneTasks = this.allTasks.filter(t => t.status === 'DONE');
+  }
+
+  // --- DRAG AND DROP LOGIC (Missing in your last snippet) ---
+  drop(event: CdkDragDrop<Task[]>) {
+    // CASE 1: Same Column (No Status Change) -> Just Reorder
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      this.saveOrder(event.container.data);
+    } 
+    // CASE 2: Different Column (Status Change + Reorder)
+    else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+
+      const task = event.container.data[event.currentIndex];
+      let newStatus = '';
+
+      if (event.container.data === this.todoTasks) newStatus = 'OPEN';
+      else if (event.container.data === this.inProgressTasks) newStatus = 'IN_PROGRESS';
+      else if (event.container.data === this.doneTasks) newStatus = 'DONE';
+
+      if (newStatus) {
+        // Optimistic Update (Visuals update instantly)
+        task.status = newStatus as any;
+        
+        // 1. CALL UPDATE STATUS
+        this.taskService.updateTask(task.id, { status: newStatus }).subscribe({
+          next: () => {
+            // 2. WAIT FOR SUCCESS, THEN CALL REORDER
+            // This ensures the backend has finished saving the status 
+            // before we touch the order, preventing the overwrite bug.
+            this.saveOrder(event.container.data);
+          },
+          error: (err) => {
+            console.error('Failed to update status', err);
+            this.loadTasks(); // Revert on error
+          }
+        });
+      }
+    }
+  }
+
+  // Helper method to keep code clean
+  saveOrder(tasks: Task[]) {
+    const newOrderIds = tasks.map(t => t.id);
+    this.taskService.reorderTasks(newOrderIds).subscribe({
+      error: (err) => console.error('Failed to reorder', err)
+    });
+  }
+
+  // --- MODALS ---
+  openAuditModal() {
+    this.isAuditModalOpen = true;
+    this.taskService.getAuditLogs().subscribe({
+      next: (logs) => this.auditLogs = logs,
+      error: (err) => console.error('Failed to load audit logs', err)
+    });
+  }
+
+  closeAuditModal() {
+    this.isAuditModalOpen = false;
+    this.auditLogs = [];
+  }
+
+  openModal() {
+    this.isModalOpen = true;
+    this.isEditMode = false;
+    this.selectedTaskId = null;
+    this.newTask = { title: '', description: '', category: 'Work' }; // <--- Reset to Work
+  }
+
+  openEditModal(task: Task) {
+    this.isModalOpen = true;
+    this.isEditMode = true;
+    this.selectedTaskId = task.id;
+    // Use existing category, or fallback to 'Work' if missing
+    this.newTask = { 
+      title: task.title, 
+      description: task.description, 
+      category: task.category || 'Work' 
+    };
+  }
+
+  closeModal() {
+    this.isModalOpen = false;
+    this.newTask = { title: '', description: '', category: 'Work' }; // <--- Reset
+  }
+
+  // --- CRUD ACTIONS ---
+  deleteTask(id: string) {
+    if (confirm('Are you sure you want to delete this task?')) {
+      this.taskService.deleteTask(id).subscribe({
+        next: () => {
+          this.loadTasks(); // Reload to refresh all columns correctly
+        },
+        error: (err) => console.error('Failed to delete task', err)
+      });
+    }
+  }
+
+  submitTask() {
+    if (!this.newTask.title || !this.newTask.description) return;
+
+    if (this.isEditMode && this.selectedTaskId) {
+      this.taskService.updateTask(this.selectedTaskId, this.newTask).subscribe({
+        next: () => {
+          this.loadTasks(); // Refresh columns
+          this.closeModal();
+        },
+        error: (err) => console.error('Failed to update task', err)
+      });
+    } else {
+      this.taskService.createTask(this.newTask).subscribe({
+        next: () => {
+          this.loadTasks(); // Refresh columns
+          this.closeModal();
+        },
+        error: (err) => console.error('Failed to create task', err)
+      });
+    }
+  }
+
+  logout() {
+    this.authService.logout();
+  }
+
+  private calculateMyDepartment() {
+    const myTask = this.allTasks.find(t => t.user?.username === this.currentUsername);
+    if (myTask && myTask.user?.organization) {
+      this.myDepartment = myTask.user.organization.name;
+    }
+  }
+}
