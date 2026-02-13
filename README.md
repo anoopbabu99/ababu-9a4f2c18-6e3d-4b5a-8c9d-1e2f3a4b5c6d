@@ -2,23 +2,35 @@
 
 ## 🛠 Setup & Installation
 
-### **1. Prerequisites**
+### **Prerequisites**
 Ensure you have the following installed on your machine:
 * **Node.js** (v18 or higher)
 * **NPM** or **Yarn**
 * **Git**
 
 
-### **2. Installation**
+### **Installation**
 
 Clone the repository and install dependencies:
 ```bash
-git clone <your-repo-url>
-cd <repo-name>
+git clone https://github.com/anoopbabu99/ababu-9a4f2c18-6e3d-4b5a-8c9d-1e2f3a4b5c6d.git
+cd https://github.com/anoopbabu99/ababu-9a4f2c18-6e3d-4b5a-8c9d-1e2f3a4b5c6d.git
 npm install
 ```
 
-### **3. Environment Configuration (.env)**
+### **Running the Application**
+You can start both the Backend API and Frontend Dashboard simultaneously with a single command:
+### npx nx run-many --target=serve --projects=api,dashboard
+
+Once the servers are running:
+
+##### Frontend Dashboard: http://localhost:4200
+
+##### Backend API: http://localhost:3000/api
+
+## Architecture Overview
+
+### **Environment Configuration (.env)**
 The application uses environment variables for database connection and JWT security.
 Create a file named .env in the root directory of the project and populate it with the following:
 ### Security (JWT)
@@ -28,17 +40,6 @@ JWT_EXPIRATION=1h
 ### Database (SQLite)
 DATABASE_NAME=database.sqlite
 For the purpose of this assessment, the application includes fallback defaults for development ease. The database.sqlite file will be automatically created in the root directory upon the first launch.
-
-### **4. Running the Application**
-You can start both the Backend API and Frontend Dashboard simultaneously with a single command:
-### npx nx run-many --target=serve --projects=api,dashboard
-Once the servers are running:
-
-##### Frontend Dashboard: http://localhost:4200
-
-##### Backend API: http://localhost:3000/api
-
-## Architecture Overview
 
 This project is architected as an **Nx Monorepo**, ensuring strictly typed contracts between the Frontend and Backend while maximizing code reuse and modularity.
 
@@ -330,3 +331,7 @@ While the current system implements a robust Zero-Trust architecture, a full-sca
 * **Policy Engines:** Hardcoding `RolesGuard` logic works for simple apps. for complex logic (e.g., "Can edit task ONLY if budget < $1000 AND created_at > 7 days"), we would migrate to **Casbin** to decouple policy logic from business code.
 
 
+## Testing the application: 
+
+### Backend: npx nx test api
+### Frontend: npx nx test dashboard
