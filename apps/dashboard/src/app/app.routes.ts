@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
 import { TaskListComponent } from './tasks/task-list/task-list.component';
-import { authGuard } from './auth.guard'; // <--- Import the bouncer
+import { authGuard } from './auth.guard'; 
 
 export const appRoutes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -10,6 +10,6 @@ export const appRoutes: Routes = [
     component: TaskListComponent,
     canActivate: [authGuard] // <--- THIS LOCKS THE DOOR
   }, 
-  // Redirect any unknown path to login
+  // Redirect unknown path to login
   { path: '**', redirectTo: 'login' } 
 ];

@@ -31,7 +31,7 @@ describe('RolesGuard', () => {
 
   it('should allow access if no roles are required (Public Route)', () => {
     const context = createMockContext(UserRole.VIEWER);
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(null); // No @Roles() found
+    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(null); 
 
     expect(guard.canActivate(context)).toBe(true);
   });
@@ -65,7 +65,7 @@ describe('RolesGuard', () => {
     const context = createMockContext(undefined); // No user
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([UserRole.ADMIN]);
 
-    // FIX: Expect the function to THROW an error, not return false
+  
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
   });
 });

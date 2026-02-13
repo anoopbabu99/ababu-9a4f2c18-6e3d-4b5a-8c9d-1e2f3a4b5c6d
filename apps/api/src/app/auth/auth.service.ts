@@ -20,7 +20,7 @@ export class AuthService {
     private usersRepository: Repository<User>,
     @InjectRepository(Organization)
     private orgRepository: Repository<Organization>, 
-    @InjectRepository(Task) //  INJECT 
+    @InjectRepository(Task)  
     private tasksRepository: Repository<Task>,
     private jwtService: JwtService
   ) {}
@@ -57,7 +57,7 @@ export class AuthService {
       if (!organization) throw new BadRequestException('Organization not found');
     } 
     
-    // --- ERROR ---
+    
     else {
       throw new BadRequestException('Must provide organizationName (to create) or organizationId (to join)');
     }
@@ -77,7 +77,7 @@ export class AuthService {
   // ... imports (Make sure Task, User, Organization, UserRole are imported)
 
   async seed() {
-    // 1. CLEANUP (Use query builder to bypass 'empty criteria' check)
+    // 1. CLEANUP 
     // Delete in order: Tasks -> Users -> Orgs (to avoid Foreign Key errors)
     await this.tasksRepository.createQueryBuilder().delete().execute();
     await this.usersRepository.createQueryBuilder().delete().execute();
@@ -146,13 +146,13 @@ export class AuthService {
       })
     );
 
-    return { message: 'Database Seeded! 🚀' };
+    return { message: 'Database Seeded!' };
   }
 
   async login(username: string, pass: string) {
     const user = await this.usersRepository.findOne({ 
       where: { username },
-      relations: ['organization'] // <--- Load the Org so we can put ID in token
+      relations: ['organization'] 
     });
 
     if (!user) throw new UnauthorizedException('User not found');

@@ -4,7 +4,7 @@ import { Repository, In } from 'typeorm';
 import { Task } from './task.entity';
 import { AuditLog } from './audit-log.entity';
 import { Organization } from '../organizations/entities/organization.entity';
-import { User } from '../users/user.entity'; // <--- FIXED IMPORT
+import { User } from '../users/user.entity'; 
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UserRole, TaskStatus } from '@ababu/data';
 

@@ -13,7 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   imports: [
     TypeOrmModule.forFeature([User, Organization, Task]),
     
-    // Use registerAsync to inject the ConfigService
+    
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

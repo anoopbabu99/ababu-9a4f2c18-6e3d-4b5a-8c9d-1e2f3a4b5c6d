@@ -80,7 +80,7 @@ describe('AuthService', () => {
     const mockUser = { id: 'u1', username: 'test', password: 'hashed_password' };
     mockUserRepository.findOne.mockResolvedValue(mockUser);
     
-    // 3. Use the mocked function directly (Force it to return FALSE)
+    
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
     await expect(service.login('test', 'wrong_pass')).rejects.toThrow(UnauthorizedException);

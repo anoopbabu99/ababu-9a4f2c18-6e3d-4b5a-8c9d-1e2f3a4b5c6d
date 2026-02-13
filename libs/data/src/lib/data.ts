@@ -37,7 +37,7 @@ export interface ITask {
   title: string;
   description: string;
   status: TaskStatus;
-  category: string; // or TaskCategory
+  category: string; 
   order: number;
   user?: IUser;
   createdAt: Date;
@@ -46,26 +46,26 @@ export interface ITask {
 // --- 3. AUTH CONTRACTS ---
 export interface IAuthResponse {
   access_token: string;
-  user: IUser; // Reuse the IUser interface you already made!
+  user: IUser; 
 }
 
 export interface ILoginPayload {
   username: string;
-  password?: string; // Optional because simpler apps might just ask for username
+  password?: string; 
 }
 
 export interface IRegisterPayload {
   username: string;
   password?: string;
-  organizationName?: string; // Optional for existing orgs
+  organizationName?: string;
 }
 
 // --- 4. TASK INPUT CONTRACTS ---
-// This ensures Frontend sends exactly what Backend expects
+
 export interface ICreateTaskPayload {
   title: string;
   description: string;
-  category?: string; // "Work" | "Personal"
+  category?: string; 
 }
 
 export interface IUpdateTaskPayload {

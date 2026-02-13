@@ -17,12 +17,12 @@ import { Organization } from './organizations/entities/organization.entity';
       isGlobal: true, 
     }),
 
-    // 2. Use forRootAsync to read from .env
+    // read from .env
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'sqlite',
-        // Read from .env, fallback to 'database.sqlite' if missing
+        // Read from .env
         database: configService.get<string>('DATABASE_NAME', 'database.sqlite'),
         entities: [User, Task, Organization],
         autoLoadEntities: true,

@@ -24,7 +24,7 @@ export class Task {
   @Column({ type: 'int', default: 0 })
   order: number;
 
-  @CreateDateColumn() // Auto-timestamps for Charts
+  @CreateDateColumn() // Auto-timestamps
   createdAt: Date;
   
 
