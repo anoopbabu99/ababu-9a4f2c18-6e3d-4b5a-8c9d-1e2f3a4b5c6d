@@ -9,6 +9,8 @@ Ensure you have the following installed on your machine:
 * **Git**
 
 
+## Console used: BASH
+
 ### **Installation**
 
 Clone the repository and install dependencies:
