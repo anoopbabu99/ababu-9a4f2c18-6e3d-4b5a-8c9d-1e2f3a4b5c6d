@@ -1,24 +1,43 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+// 1. Fix "Observable is not there" error:
+import { Observable } from 'rxjs'; 
 import { tap } from 'rxjs/operators';
 
-@Injectable({ providedIn: 'root' })
-export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/auth';
-  
-  // Signal to track login state
-  currentUser = signal<any>(null);
+// 2. Import the shared interfaces
+import { IAuthResponse, ILoginPayload, IRegisterPayload } from '@ababu/data';
 
-  constructor(private http: HttpClient, private router: Router) {
-    const token = this.getToken(); // <--- Now this works
-    if (token) {
-      this.currentUser.set({ token }); 
-    }
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  
+  // Update this to your actual API URL
+  private apiUrl = 'http://localhost:3000/api'; 
+
+  // Signal to track user state
+  currentUser = signal<{ token: string | null }>({ token: localStorage.getItem('access_token') });
+
+  // --- LOGIN ---
+  login(payload: ILoginPayload): Observable<IAuthResponse> {
+    return this.http.post<IAuthResponse>(`${this.apiUrl}/auth/login`, payload).pipe(
+      tap(response => {
+        // NOTE: Ensure your Backend returns 'accessToken' (camelCase) to match the Interface!
+        // If your backend returns 'access_token', change the Interface in libs/data to match.
+        localStorage.setItem('access_token', response.access_token); 
+        
+        this.currentUser.set({ token: response.access_token });
+        this.router.navigate(['/']);
+      })
+    );
   }
 
-  login(credentials: { username: string; password: string }) {
-    return this.http.post<{ access_token: string }>(`${this.apiUrl}/login`, credentials).pipe(
+  // --- REGISTER ---
+  register(payload: IRegisterPayload): Observable<IAuthResponse> {
+    return this.http.post<IAuthResponse>(`${this.apiUrl}/auth/register`, payload).pipe(
       tap(response => {
         localStorage.setItem('access_token', response.access_token);
         this.currentUser.set({ token: response.access_token });
@@ -27,41 +46,39 @@ export class AuthService {
     );
   }
 
+  // --- LOGOUT ---
   logout() {
     localStorage.removeItem('access_token');
-    this.currentUser.set(null);
+    this.currentUser.set({ token: null });
     this.router.navigate(['/login']);
   }
 
-  getUserRole(): string {
-    const token = this.getToken();
-    if (!token) return 'VIEWER'; // Default to lowest permission
-    
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role; // This assumes your NestJS JWT strategy saved 'role' in the payload
-    } catch (e) {
-      return 'VIEWER';
-    }
+  // Helper to get token
+  getToken() {
+    return this.currentUser().token;
   }
 
-  // --- MISSING METHODS ADDED BELOW ---
-
-  getToken(): string | null {
-    return localStorage.getItem('access_token');
-  }
-
+  // Helper to get username from token (Simple decode)
   getUsername(): string {
     const token = this.getToken();
     if (!token) return 'Guest';
-    
     try {
-      // Decodes the JWT payload (the part between the dots)
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.username; 
+      return payload.username;
     } catch (e) {
-      console.error('Error decoding token', e);
-      return 'User';
+      return 'Guest';
+    }
+  }
+
+  // Helper to get Role
+  getUserRole(): string {
+    const token = this.getToken();
+    if (!token) return 'VIEWER';
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role || 'VIEWER';
+    } catch (e) {
+      return 'VIEWER';
     }
   }
 }

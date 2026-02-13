@@ -2,20 +2,23 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: 'OPEN' | 'IN_PROGRESS' | 'DONE';
-  category?: string;
-  user?: {
-    id: string;
-    username: string;
-    organization?: {
-      name: string; // We need this for the "Dept: Engineering" badge
-    };
-  };
-}
+import { ITask, TaskStatus } from '@ababu/data';
+export type Task = ITask;
+
+// export interface Task {
+//   id: string;
+//   title: string;
+//   description: string;
+//   status: 'OPEN' | 'IN_PROGRESS' | 'DONE';
+//   category?: string;
+//   user?: {
+//     id: string;
+//     username: string;
+//     organization?: {
+//       name: string; // We need this for the "Dept: Engineering" badge
+//     };
+//   };
+// }
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {

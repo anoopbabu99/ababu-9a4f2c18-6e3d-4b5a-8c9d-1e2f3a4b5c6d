@@ -12,10 +12,11 @@ import {
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { TaskStatus } from './task.entity';
+import { TaskStatus, UserRole } from '@ababu/data';
+import { Roles, RolesGuard } from '@ababu/auth';
 
 @Controller('tasks')
-@UseGuards(AuthGuard('jwt')) // <--- This protects ALL routes below, including PATCH
+@UseGuards(AuthGuard('jwt'), RolesGuard) // <--- This protects ALL routes below, including PATCH
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
@@ -55,6 +56,7 @@ export class TasksController {
 
   // 5. DELETE TASK
   @Delete(':id')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   remove(@Param('id') id: string, @Request() req) {
     return this.tasksService.deleteTask(id, req.user);
   }

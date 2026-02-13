@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { TaskService, Task } from '../../services/task.service';
 import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { TaskStatus } from '@ababu/data';
 import { 
   CdkDragDrop, 
   moveItemInArray, 
@@ -25,6 +26,9 @@ export class TaskListComponent implements OnInit {
   selectedUser = '';
   selectedCategory = '';
   sortBy = 'newest'; // Default sort
+  isDeleteModalOpen = false;
+  isAccessDeniedModalOpen = false;
+  taskToDeleteId: string | null = null;
 
   // DROPDOWN OPTIONS (Computed dynamically)
   uniqueOrgs: string[] = [];
@@ -214,15 +218,40 @@ export class TaskListComponent implements OnInit {
   }
 
   // --- CRUD ACTIONS ---
-  deleteTask(id: string) {
-    if (confirm('Are you sure you want to delete this task?')) {
-      this.taskService.deleteTask(id).subscribe({
+  initiateDelete(task: Task) {
+    // Check Permissions immediately
+    if (this.userRole === 'VIEWER') {
+      this.isAccessDeniedModalOpen = true; // Show "You can't do this"
+      return;
+    }
+
+    // If Admin/Owner, show "Are you sure?"
+    this.taskToDeleteId = task.id;
+    this.isDeleteModalOpen = true;
+  }
+
+  // 2. User clicks "Confirm" in the modal
+  confirmDelete() {
+    if (this.taskToDeleteId) {
+      this.taskService.deleteTask(this.taskToDeleteId).subscribe({
         next: () => {
-          this.loadTasks(); // Reload to refresh all columns correctly
+          this.loadTasks(); // Refresh list
+          this.closeDeleteModal();
         },
-        error: (err) => console.error('Failed to delete task', err)
+        error: (err) => {
+          console.error('Delete failed', err);
+          alert('Failed to delete task'); // Fallback error
+          this.closeDeleteModal();
+        }
       });
     }
+  }
+
+  // 3. User clicks Cancel/Close
+  closeDeleteModal() {
+    this.isDeleteModalOpen = false;
+    this.isAccessDeniedModalOpen = false;
+    this.taskToDeleteId = null;
   }
 
   submitTask() {

@@ -1,12 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, CreateDateColumn } from 'typeorm';
 import { Task } from '../tasks/task.entity';
 import { Organization } from '../organizations/entities/organization.entity'; // <--- Import this
-
-export enum UserRole {
-  OWNER = 'OWNER',
-  ADMIN = 'ADMIN',
-  VIEWER = 'VIEWER',
-}
+import { UserRole } from '@ababu/data';
+// export enum UserRole {
+//   OWNER = 'OWNER',
+//   ADMIN = 'ADMIN',
+//   VIEWER = 'VIEWER',
+// }
 
 @Entity()
 export class User {

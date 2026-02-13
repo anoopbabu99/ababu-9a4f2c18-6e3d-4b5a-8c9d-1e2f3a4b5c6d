@@ -1,12 +1,16 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserRole } from '../users/user.entity';
+import { User } from '../users/user.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { CreateAuthDto } from './dto/create-auth.dto'; // <--- Using the correct file
-import { Task, TaskStatus } from '../tasks/task.entity';
+import { Task } from '../tasks/task.entity';
+import { TaskStatus } from '@ababu/data';
+import { UserRole } from '@ababu/data';
+
+import { IAuthResponse, ILoginPayload, IRegisterPayload } from '@ababu/data';
 
 
 @Injectable()

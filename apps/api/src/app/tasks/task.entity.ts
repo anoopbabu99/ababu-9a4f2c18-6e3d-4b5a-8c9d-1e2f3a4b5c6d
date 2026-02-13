@@ -1,11 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
 import { User } from '../users/user.entity';
 
-export enum TaskStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
-  DONE = 'DONE',
-}
+import { TaskStatus } from '@ababu/data';
 
 @Entity()
 export class Task {
