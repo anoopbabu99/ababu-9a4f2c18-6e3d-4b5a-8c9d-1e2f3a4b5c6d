@@ -5,20 +5,7 @@ import { Observable } from 'rxjs';
 import { ITask, TaskStatus } from '@ababu/data';
 export type Task = ITask;
 
-// export interface Task {
-//   id: string;
-//   title: string;
-//   description: string;
-//   status: 'OPEN' | 'IN_PROGRESS' | 'DONE';
-//   category?: string;
-//   user?: {
-//     id: string;
-//     username: string;
-//     organization?: {
-//       name: string; // We need this for the "Dept: Engineering" badge
-//     };
-//   };
-// }
+
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
@@ -37,7 +24,7 @@ export class TaskService {
     return this.http.post<Task>(this.apiUrl, task);
   }
   updateTask(id: string, task: { title?: string; description?: string; status?: string }): Observable<Task> {
-  // CHANGE THIS WORD FROM .put TO .patch
+  
   return this.http.patch<Task>(`${this.apiUrl}/${id}`, task);
 }
 deleteTask(id: string): Observable<void> {
@@ -47,5 +34,5 @@ deleteTask(id: string): Observable<void> {
   return this.http.get<any[]>(`${this.apiUrl}/audit-log`);
 }
 
-  // We will add create/update/delete here later!
+  
 }

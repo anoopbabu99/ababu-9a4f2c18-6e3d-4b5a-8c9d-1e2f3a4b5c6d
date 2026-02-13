@@ -19,7 +19,7 @@ export class TasksService {
     private orgRepository: Repository<Organization>,
   ) {}
 
-  // --- HELPER: SAVE LOG ---
+  //  SAVE LOG ---
   private async logAction(user: any, taskId: string, action: string, details: string) {
     const log = this.auditLogRepository.create({
       userId: user.username, 
@@ -40,17 +40,17 @@ export class TasksService {
   }
 
   // --- 1. CREATE TASK ---
-  // Inside TasksService
+  
 
   async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
-    // 1. Extract category too!
+    
     const { title, description, category } = createTaskDto;
 
     const task = this.tasksRepository.create({
       title,
       description,
       status: TaskStatus.OPEN,
-      category: category || 'Work', // Save the category (Default to Work if missing)
+      category: category || 'Work', 
       user, 
     });
 
@@ -87,10 +87,10 @@ export class TasksService {
     return this.tasksRepository.find({
       where, 
       relations: ['user', 'user.organization'], 
-      // CHANGE ORDER HERE:
+      
       order: { 
         order: 'ASC', // Sort by custom order first
-        status: 'ASC', // Then by status (fallback)
+        status: 'ASC', // Then by status 
         createdAt: 'DESC'
 
       }
@@ -98,7 +98,6 @@ export class TasksService {
   }
 
   // --- 3. UPDATE TASK ---
-  // --- 3. UPDATE TASK (With Smart Logging) ---
 
   async updateTask(id: string, updates: { title?: string; description?: string; status?: TaskStatus; category?: string }, user: any): Promise<Task> {
     const task = await this.tasksRepository.findOne({ 
@@ -129,14 +128,14 @@ export class TasksService {
       task.title = updates.title;
     }
     
-    // 2. Category (Handle potential nulls for old tasks)
+    // 2. Category 
     if (updates.category && updates.category !== task.category) {
       const oldCat = task.category || 'General';
       changes.push(`Category changed from "${oldCat}" to "${updates.category}"`);
       task.category = updates.category;
     }
 
-    // 3. Description (Truncate if too long to keep logs clean)
+    // 3. Description 
     if (updates.description && updates.description !== task.description) {
       const oldDesc = task.description.length > 20 ? task.description.substring(0, 20) + '...' : task.description;
       const newDesc = updates.description.length > 20 ? updates.description.substring(0, 20) + '...' : updates.description;
@@ -167,7 +166,7 @@ export class TasksService {
   async deleteTask(id: string, user: any): Promise<void> {
     const task = await this.tasksRepository.findOne({ 
       where: { id }, 
-      // CRITICAL FIX: Added 'user.organization.parent' here too
+      
       relations: ['user', 'user.organization', 'user.organization.parent'] 
     });
 

@@ -15,7 +15,7 @@ import {
   selector: 'app-task-list',
   standalone: true,
   imports: [CommonModule, FormsModule, DragDropModule],
-  templateUrl: './task-list.component.html' // <--- Pointing to the new file
+  templateUrl: './task-list.component.html' 
 })
 export class TaskListComponent implements OnInit {
   // MASTER LIST
@@ -30,11 +30,11 @@ export class TaskListComponent implements OnInit {
   isAccessDeniedModalOpen = false;
   taskToDeleteId: string | null = null;
 
-  // DROPDOWN OPTIONS (Computed dynamically)
+  // DROPDOWN OPTIONS 
   uniqueOrgs: string[] = [];
   uniqueUsers: string[] = [];
   
-  // DRAG & DROP ARRAYS (Must be distinct for drag to work)
+  // DRAG & DROP ARRAYS 
   todoTasks: Task[] = [];
   inProgressTasks: Task[] = [];
   doneTasks: Task[] = [];
@@ -67,11 +67,11 @@ export class TaskListComponent implements OnInit {
       next: (data) => {
         this.allTasks = data;
         
-        // FIX: Add 'as string[]' to the end
+       
         this.uniqueOrgs = [...new Set(data.map(t => t.user?.organization?.name).filter(Boolean))] as string[];
         this.uniqueUsers = [...new Set(data.map(t => t.user?.username).filter(Boolean))] as string[];
         
-        // Apply filters immediately (to populate columns)
+        
         this.applyFilters(); 
         this.calculateMyDepartment();
       },
@@ -99,11 +99,7 @@ export class TaskListComponent implements OnInit {
 
     // 4. Sort (Newest vs Oldest)
     if (this.sortBy === 'newest') {
-      // Sort by Created Date (assuming your entity has createdAt, otherwise use ID)
-      // Since we didn't explicitly return createdAt in DTO, we might rely on ID (lexicographical) or order
-      // Let's rely on the order we got from backend (which includes user defined order)
-      // BUT if the user wants "Newest", we can reverse logic if needed. 
-      // For now, let's keep the Drag-and-Drop order as the "master" sort unless explicitly overridden.
+      //already done
     }
 
     // 5. Update the Columns
@@ -127,7 +123,7 @@ export class TaskListComponent implements OnInit {
     this.doneTasks = this.allTasks.filter(t => t.status === 'DONE');
   }
 
-  // --- DRAG AND DROP LOGIC (Missing in your last snippet) ---
+  // --- DRAG AND DROP LOGIC 
   drop(event: CdkDragDrop<Task[]>) {
     // CASE 1: Same Column (No Status Change) -> Just Reorder
     if (event.previousContainer === event.container) {
@@ -151,27 +147,26 @@ export class TaskListComponent implements OnInit {
       else if (event.container.data === this.doneTasks) newStatus = 'DONE';
 
       if (newStatus) {
-        // Optimistic Update (Visuals update instantly)
+        // Optimistic Update 
         task.status = newStatus as any;
         
         // 1. CALL UPDATE STATUS
         this.taskService.updateTask(task.id, { status: newStatus }).subscribe({
           next: () => {
             // 2. WAIT FOR SUCCESS, THEN CALL REORDER
-            // This ensures the backend has finished saving the status 
-            // before we touch the order, preventing the overwrite bug.
+            
             this.saveOrder(event.container.data);
           },
           error: (err) => {
             console.error('Failed to update status', err);
-            this.loadTasks(); // Revert on error
+            this.loadTasks(); 
           }
         });
       }
     }
   }
 
-  // Helper method to keep code clean
+  
   saveOrder(tasks: Task[]) {
     const newOrderIds = tasks.map(t => t.id);
     this.taskService.reorderTasks(newOrderIds).subscribe({
@@ -197,7 +192,7 @@ export class TaskListComponent implements OnInit {
     this.isModalOpen = true;
     this.isEditMode = false;
     this.selectedTaskId = null;
-    this.newTask = { title: '', description: '', category: 'Work' }; // <--- Reset to Work
+    this.newTask = { title: '', description: '', category: 'Work' }; 
   }
 
   openEditModal(task: Task) {
@@ -214,10 +209,10 @@ export class TaskListComponent implements OnInit {
 
   closeModal() {
     this.isModalOpen = false;
-    this.newTask = { title: '', description: '', category: 'Work' }; // <--- Reset
+    this.newTask = { title: '', description: '', category: 'Work' }; 
   }
 
-  // --- CRUD ACTIONS ---
+  // --- CRUD ---
   initiateDelete(task: Task) {
     // Check Permissions immediately
     if (this.userRole === 'VIEWER') {

@@ -64,14 +64,13 @@ describe('AuthService', () => {
 
     mockUserRepository.findOne.mockResolvedValue(mockUser);
     
-    // 2. Use the mocked function directly (Force it to return TRUE)
+    
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
     const result = await service.login('test', 'password');
 
     expect(result).toEqual({ 
       access_token: 'mock_access_token', 
-      // user: mockUser 
     });
     expect(mockJwtService.sign).toHaveBeenCalled();
   });

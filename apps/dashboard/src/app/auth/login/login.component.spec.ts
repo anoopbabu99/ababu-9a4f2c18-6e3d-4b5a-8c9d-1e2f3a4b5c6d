@@ -14,7 +14,7 @@ describe('LoginComponent', () => {
         LoginComponent, 
         HttpClientTestingModule, // Fake HTTP
         RouterTestingModule,     // Fake Router
-        NoopAnimationsModule     // Disable animations
+        NoopAnimationsModule     
       ]
     }).compileComponents();
 

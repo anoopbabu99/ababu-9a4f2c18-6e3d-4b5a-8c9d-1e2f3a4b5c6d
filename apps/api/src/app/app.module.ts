@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config'; // <--- Import these
+import { ConfigModule, ConfigService } from '@nestjs/config'; 
 import { User } from './users/user.entity';
 import { Task } from './tasks/task.entity';
 import { AppController } from './app.controller';
@@ -12,7 +12,7 @@ import { Organization } from './organizations/entities/organization.entity';
 
 @Module({
   imports: [
-    // 1. Load the Config Module globally so .env works everywhere
+    
     ConfigModule.forRoot({
       isGlobal: true, 
     }),

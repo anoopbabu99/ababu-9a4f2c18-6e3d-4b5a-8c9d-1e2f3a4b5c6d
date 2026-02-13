@@ -5,7 +5,7 @@ import { User } from '../users/user.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { CreateAuthDto } from './dto/create-auth.dto'; // <--- Using the correct file
+import { CreateAuthDto } from './dto/create-auth.dto'; 
 import { Task } from '../tasks/task.entity';
 import { TaskStatus } from '@ababu/data';
 import { UserRole } from '@ababu/data';
@@ -19,8 +19,8 @@ export class AuthService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(Organization)
-    private orgRepository: Repository<Organization>, // <--- Inject Org Repo
-    @InjectRepository(Task) // <--- 2. INJECT THIS
+    private orgRepository: Repository<Organization>, 
+    @InjectRepository(Task) //  INJECT 
     private tasksRepository: Repository<Task>,
     private jwtService: JwtService
   ) {}

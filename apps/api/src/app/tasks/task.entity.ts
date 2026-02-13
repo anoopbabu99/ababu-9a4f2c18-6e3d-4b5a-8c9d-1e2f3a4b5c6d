@@ -17,7 +17,7 @@ export class Task {
   @Column({ type: 'simple-enum', enum: TaskStatus, default: TaskStatus.OPEN })
   status: TaskStatus;
 
-  // --- NEW FIELDS ---
+  
   @Column({ default: 'General' }) // Default category
   category: string;
 
@@ -26,7 +26,7 @@ export class Task {
 
   @CreateDateColumn() // Auto-timestamps for Charts
   createdAt: Date;
-  // ------------------
+  
 
   @ManyToOne(() => User, (user) => user.tasks, { eager: false })
   user: User;

@@ -5,7 +5,7 @@ import {
   Delete, 
   Body, 
   Param, 
-  Patch, // <--- Key Import
+  Patch,
   UseGuards, 
   Request 
 } from '@nestjs/common';
@@ -16,7 +16,7 @@ import { TaskStatus, UserRole } from '@ababu/data';
 import { Roles, RolesGuard } from '@ababu/auth';
 
 @Controller('tasks')
-@UseGuards(AuthGuard('jwt'), RolesGuard) // <--- This protects ALL routes below, including PATCH
+@UseGuards(AuthGuard('jwt'), RolesGuard) // <--- This protects ALL routes below
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
@@ -32,7 +32,7 @@ export class TasksController {
     return this.tasksService.getTasks(req.user);
   }
 
-  // 3. AUDIT LOGS (CRITICAL: Must be ABOVE ':id' routes)
+  // 3. AUDIT LOGS 
   @Get('audit-log')
   getAuditLogs(@Request() req) {
     return this.tasksService.getAuditLogs(req.user);
@@ -47,7 +47,6 @@ export class TasksController {
   @Patch(':id') 
   update(
     @Param('id') id: string, 
-    // Add 'category?: string' to this type definition
     @Body() updateDto: { title?: string; description?: string; status?: TaskStatus; category?: string }, 
     @Request() req
   ) {
