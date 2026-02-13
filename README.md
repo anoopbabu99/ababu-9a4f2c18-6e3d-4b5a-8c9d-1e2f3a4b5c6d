@@ -32,6 +32,21 @@ Once the servers are running:
 
 Some data is already seeded into: database.sqlite so you can see sample entries!
 
+sample users:
+1. (owner)
+username: elon
+password: password123
+
+2. (admin)
+username: gwynne
+password: password123
+
+3. (viewer)
+username: tom
+password: password123
+
+
+
 ## Architecture Overview
 
 ### **Environment Configuration (.env)**
